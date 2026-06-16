@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scroll Studio — Client Portal</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --white: #ffffff;
+    --off: #f7f7f5;
+    --gray-100: #f0f0ee;
+    --gray-200: #e4e4e0;
+    --gray-400: #9e9e96;
+    --gray-600: #5a5a54;
+    --gray-900: #1a1a16;
+    --lime: #c8f060;
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--off);
+    color: var(--gray-900);
+    min-height: 100vh;
+  }
+
+  #login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--white);
+  }
+
+  .login-box {
+    width: 100%;
+    max-width: 380px;
+    padding: 0 24px;
+  }
+
+  .login-logo { margin-bottom: 40px; }
+
+  .wordmark {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: var(--gray-900);
+  }
+
+  .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--lime);
+    border-radius: 50%;
+    margin-left: 2px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+  }
+
+  .login-box h1 {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  .login-box > p {
+    font-size: 14px;
+    color: var(--gray-400);
+    margin-bottom: 32px;
+  }
+
+  .form-group { margin-bottom: 14px; }
+
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-600);
+    margin-bottom: 6px;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius);
+    font-size: 15px;
+    color: var(--gray-900);
+    background: var(--white);
+    transition: border-color 0.15s;
+    outline: none;
+  }
+
+  .form-group input:focus { border-color: var(--gray-900); }
+
+  .login-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--gray-900);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: opacity 0.15s;
+  }
+
+  .login-btn:hover { opacity: 0.85; }
+  .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .login-error {
+    color: var(--red);
+    font-size: 13px;
+    margin-top: 10px;
+    display: none;
+  }
+
+  .login-loading {
+    color: var(--gray-400);
+    font-size: 13px;
+    margin-top: 10px;
+    display: none;
+  }
+
+  #portal { display: none; }
+
+  .topbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 0 32px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .topbar-left { display: flex; align-items: center; gap: 24px; }
+
+  .client-badge {
+    font-size: 12px;
+    color: var(--gray-400);
+    background: var(--gray-100);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  .logout-btn {
+    font-size: 13px;
+    color: var(--gray-400);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.15s;
+  }
+
+  .logout-btn:hover { background: var(--gray-100); color: var(--gray-600); }
+
+  .main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+
+  .page-header { margin-bottom: 32px; }
+
+  .page-header h2 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.4px;
+    margin-bottom: 4px;
+  }
+
+  .page-header p { font-size: 14px; color: var(--gray-400); }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: var(--gray-900);
+  }
+
+  .stat-sub { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+
+  .section-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--gray-400);
+    margin-bottom: 14px;
+  }
+
+  .ad-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: box-shadow 0.15s;
+  }
+
+  .ad-card:hover { box-shadow: var(--shadow-md); }
+  .ad-card-inner { padding: 20px 24px; }
+
+  .ad-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .ad-meta { flex: 1; }
+
+  .ad-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 4px;
+    letter-spacing: -0.2px;
+  }
+
+  .ad-date { font-size: 12px; color: var(--gray-400); }
+
+  .ad-status {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    letter-spacing: 0.2px;
+  }
+
+  .status-pending { background: #fef3c7; color: #92400e; }
+  .status-approved { background: #dcfce7; color: #166534; }
+  .status-revision { background: #fee2e2; color: #991b1b; }
+
+  .ad-body { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--gray-100); display: none; }
+  .ad-body.open { display: block; }
+
+  .ad-script {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--gray-600);
+    background: var(--off);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    white-space: pre-wrap;
+  }
+
+  .ad-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .btn {
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+
+  .btn:active { transform: scale(0.98); }
+  .btn-approve { background: var(--green); color: white; }
+  .btn-revision { background: var(--white); color: var(--gray-900); border: 1.5px solid var(--gray-200); }
+  .btn-toggle { background: none; border: none; font-size: 13px; color: var(--gray-400); cursor: pointer; padding: 4px 0; margin-top: 8px; display: block; }
+  .btn:hover { opacity: 0.85; }
+
+  .revision-form { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--gray-100); }
+  .revision-form.open { display: block; }
+
+  .revision-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--gray-900);
+    resize: vertical;
+    min-height: 90px;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.15s;
+  }
+
+  .revision-form textarea:focus { border-color: var(--gray-900); }
+
+  .btn-submit {
+    margin-top: 10px;
+    background: var(--gray-900);
+    color: white;
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+  }
+
+  .success-msg { font-size: 13px; color: var(--green); margin-top: 8px; display: none; }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--gray-400); }
+  .empty-state .icon { font-size: 36px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  @media (max-width: 600px) {
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .topbar { padding: 0 16px; }
+    .main { padding: 24px 16px; }
+    .ad-card-inner { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <span class="wordmark">Scroll Studio<span class="dot"></span></span>
+    </div>
+    <h1>Client Portal</h1>
+    <p>Sign in to review and approve your ad creative.</p>
+    <div class="form-group">
+      <label>Brand name</label>
+      <input type="text" id="login-brand" placeholder="e.g. Nike" autocomplete="off" />
+    </div>
+    <div class="form-group">
+      <label>Access code</label>
+      <input type="password" id="login-code" placeholder="••••••••" />
+    </div>
+    <button class="login-btn" id="login-btn" onclick="handleLogin()">Sign in</button>
+    <div class="login-loading" id="login-loading">Checking credentials…</div>
+    <div class="login-error" id="login-error">Incorrect brand name or access code.</div>
+  </div>
+</div>
+
+<div id="portal">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="wordmark">Scroll Studio</span>
+      <span class="client-badge" id="client-name-badge"></span>
+    </div>
+    <button class="logout-btn" onclick="handleLogout()">Sign out</button>
+  </div>
+  <div class="main">
+    <div class="page-header">
+      <h2 id="portal-greeting">Your Ad Creative</h2>
+      <p>Review, approve, or request revisions on your delivered ads.</p>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Delivered</div>
+        <div class="stat-value" id="stat-delivered">0</div>
+        <div class="stat-sub">this month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Approved</div>
+        <div class="stat-value" id="stat-approved">0</div>
+        <div class="stat-sub">ready to run</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pending Review</div>
+        <div class="stat-value" id="stat-pending">0</div>
+        <div class="stat-sub">awaiting your feedback</div>
+      </div>
+    </div>
+    <div class="section-label">This month's ads</div>
+    <div id="ads-list"></div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const SHEET_ID = '1a315tNpHI6lJV-aM9HE4MbeYixxA3SOFL6UpfdUPBHQ';
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
+
+// Ads data — keyed by brand name (lowercase)
+// Add delivered ads here per client
+const ADS_DATA = {
+  'testclient': [
+    {
+      id: 1,
+      title: "Hook Battery — Pain Angle",
+      date: "Jun 16, 2026",
+      status: "pending",
+      script: `🎣 HOOKS\nHook 1 (Pain): My home office was a literal sweat box.\nHook 2 (Curiosity): This device dropped my desk temp by 11 degrees.\nHook 3 (Social Proof): 47,000 WFH people bought this fan last summer.\n\n📝 SCRIPT\nMy home office was a literal sweat box. I'm trying to be productive and I'm sweating through my shirt by 10am. Then I got ArcticBreeze and I can't believe I waited this long. 40% off today only — link in bio.`
+    }
+  ]
+};
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let currentClient = null;
+let adStatuses = {};
+
+async function fetchClients() {
+  const res = await fetch(SHEET_URL);
+  const text = await res.text();
+  const json = JSON.parse(text.substring(47).slice(0, -2));
+  const rows = json.table.rows;
+  return rows.map(row => ({
+    brand: row.c[0]?.v || '',
+    code: String(row.c[1]?.v || ''),
+    package: row.c[2]?.v || '',
+    email: row.c[3]?.v || '',
+    active: row.c[4]?.v
+  })).filter(c => c.active === true || c.active === 'TRUE');
+}
+
+async function handleLogin() {
+  const brand = document.getElementById('login-brand').value.trim();
+  const code = document.getElementById('login-code').value.trim();
+
+  if (!brand || !code) return;
+
+  document.getElementById('login-btn').disabled = true;
+  document.getElementById('login-loading').style.display = 'block';
+  document.getElementById('login-error').style.display = 'none';
+
+  try {
+    const clients = await fetchClients();
+    const client = clients.find(c =>
+      c.brand.toLowerCase() === brand.toLowerCase() && c.code === code
+    );
+
+    if (!client) {
+      document.getElementById('login-error').style.display = 'block';
+      document.getElementById('login-loading').style.display = 'none';
+      document.getElementById('login-btn').disabled = false;
+      return;
+    }
+
+    currentClient = client;
+    const ads = ADS_DATA[brand.toLowerCase()] || [];
+    currentClient.ads = ads;
+    adStatuses = {};
+    ads.forEach(ad => { adStatuses[ad.id] = ad.status; });
+    showPortal();
+
+  } catch (e) {
+    document.getElementById('login-error').textContent = 'Connection error. Please try again.';
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('login-loading').style.display = 'none';
+    document.getElementById('login-btn').disabled = false;
+  }
+}
+
+function handleLogout() {
+  currentClient = null;
+  document.getElementById('portal').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-brand').value = '';
+  document.getElementById('login-code').value = '';
+  document.getElementById('login-error').style.display = 'none';
+  document.getElementById('login-loading').style.display = 'none';
+  document.getElementById('login-btn').disabled = false;
+}
+
+function showPortal() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('portal').style.display = 'block';
+  document.getElementById('client-name-badge').textContent = currentClient.brand;
+  document.getElementById('portal-greeting').textContent = currentClient.brand + "'s Ad Creative";
+  renderAds();
+  updateStats();
+}
+
+function renderAds() {
+  const list = document.getElementById('ads-list');
+  const ads = currentClient.ads || [];
+  if (!ads.length) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>No ads delivered yet. Your first batch is on the way.</p></div>`;
+    return;
+  }
+  list.innerHTML = ads.map(ad => {
+    const status = adStatuses[ad.id];
+    const statusLabel = { pending: 'Awaiting Review', approved: 'Approved', revision: 'Revision Requested' }[status];
+    const statusClass = { pending: 'status-pending', approved: 'status-approved', revision: 'status-revision' }[status];
+    return `
+    <div class="ad-card" id="card-${ad.id}">
+      <div class="ad-card-inner">
+        <div class="ad-header">
+          <div class="ad-meta">
+            <div class="ad-title">${ad.title}</div>
+            <div class="ad-date">Delivered ${ad.date}</div>
+          </div>
+          <span class="ad-status ${statusClass}" id="status-badge-${ad.id}">${statusLabel}</span>
+        </div>
+        <button class="btn-toggle" onclick="toggleAd(${ad.id})" id="toggle-${ad.id}">View script ↓</button>
+        <div class="ad-body" id="body-${ad.id}">
+          <div class="ad-script">${ad.script}</div>
+          <div class="ad-actions" id="actions-${ad.id}">
+            ${status !== 'approved' ? `<button class="btn btn-approve" onclick="approveAd(${ad.id})">✓ Approve</button>` : ''}
+            ${status !== 'revision' ? `<button class="btn btn-revision" onclick="showRevision(${ad.id})">Request revision</button>` : ''}
+          </div>
+          <div class="revision-form" id="revision-form-${ad.id}">
+            <textarea placeholder="Describe what you'd like changed..." id="revision-text-${ad.id}"></textarea>
+            <button class="btn-submit" onclick="submitRevision(${ad.id})">Submit revision request</button>
+            <div class="success-msg" id="success-${ad.id}">✓ Revision request sent to Scroll Studio.</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleAd(id) {
+  const body = document.getElementById(`body-${id}`);
+  const toggle = document.getElementById(`toggle-${id}`);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open');
+  toggle.textContent = isOpen ? 'View script ↓' : 'Hide script ↑';
+}
+
+function approveAd(id) {
+  adStatuses[id] = 'approved';
+  updateAdStatus(id);
+  updateStats();
+}
+
+function showRevision(id) {
+  document.getElementById(`revision-form-${id}`).classList.add('open');
+}
+
+function submitRevision(id) {
+  const text = document.getElementById(`revision-text-${id}`).value.trim();
+  if (!text) return;
+  adStatuses[id] = 'revision';
+  updateAdStatus(id);
+  document.getElementById(`success-${id}`).style.display = 'block';
+  updateStats();
+}
+
+function updateAdStatus(id) {
+  const status = adStatuses[id];
+  const statusLabel = { pending: 'Awaiting Review', approved: 'Approved', revision: 'Revision Requested' }[status];
+  const statusClass = { pending: 'status-pending', approved: 'status-approved', revision: 'status-revision' }[status];
+  const badge = document.getElementById(`status-badge-${id}`);
+  badge.textContent = statusLabel;
+  badge.className = `ad-status ${statusClass}`;
+  const actions = document.getElementById(`actions-${id}`);
+  actions.innerHTML = `
+    ${status !== 'approved' ? `<button class="btn btn-approve" onclick="approveAd(${id})">✓ Approve</button>` : ''}
+    ${status !== 'revision' ? `<button class="btn btn-revision" onclick="showRevision(${id})">Request revision</button>` : ''}
+  `;
+}
+
+function updateStats() {
+  const ads = currentClient.ads || [];
+  const statuses = Object.values(adStatuses);
+  document.getElementById('stat-delivered').textContent = ads.length;
+  document.getElementById('stat-approved').textContent = statuses.filter(s => s === 'approved').length;
+  document.getElementById('stat-pending').textContent = statuses.filter(s => s === 'pending').length;
+}
+
+document.getElementById('login-code').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleLogin();
+});
+</script>
+</body>
+</html>
