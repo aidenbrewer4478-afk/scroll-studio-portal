@@ -242,10 +242,12 @@ function showPortal() {
 function renderAds() {
   const list = document.getElementById('ads-list');
   const ads = currentClient.ads || [];
+  console.log('renderAds called, ads:', ads.length, 'adStatuses:', adStatuses);
   if (!ads.length) {
-    list.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>No ads delivered yet — your first batch is on the way. We'll notify you when they're ready.</p></div>`;
+    list.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>No ads delivered yet — your first batch is on the way. We will notify you when they are ready.</p></div>`;
     return;
   }
+  console.log('rendering', ads.length, 'ads');
   list.innerHTML = ads.map(ad => {
     const status = adStatuses[ad.id];
     const statusLabel = { pending: 'Awaiting Review', approved: 'Approved', revision: 'Revision Requested' }[status];
