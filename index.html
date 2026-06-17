@@ -202,9 +202,11 @@ async function handleLogin() {
       return;
     }
     currentClient = client;
-    currentClient.ads = await fetchAds(brand);
+    const ads = await fetchAds(brand);
+    currentClient.ads = ads;
     adStatuses = {};
-    currentClient.ads.forEach(ad => { adStatuses[ad.id] = ad.status; });
+    ads.forEach(ad => { adStatuses[ad.id] = ad.status; });
+    console.log('Ads loaded:', ads.length, ads);
     showPortal();
   } catch(e) {
     document.getElementById('login-error').textContent = 'Connection error. Please try again.';
