@@ -561,9 +561,22 @@ function showRevision(id) {
   document.getElementById(`revision-form-${id}`).classList.add('open');
 }
 
-function submitRevision(id) {
+async function submitRevision(id) {
   const text = document.getElementById(`revision-text-${id}`).value.trim();
   if (!text) return;
+  const ad = currentClient.ads.find(a => a.id === id);
+  try {
+    await fetch('https://hook.us2.make.com/ajw1et5mg2iwr1icou621ifftw85ylg5', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        client_name: currentClient.brand,
+        ad_title: ad ? ad.title : 'Unknown ad',
+        revision_notes: text,
+        submitted_at: new Date().toISOString()
+      })
+    });
+  } catch(e) { console.log('Webhook failed', e); }
   adStatuses[id] = 'revision';
   updateAdStatus(id);
   document.getElementById(`success-${id}`).style.display = 'block';
