@@ -176,7 +176,7 @@ async function fetchAds(brand) {
       .map((row, i) => ({
         id: i + 1,
         title: row.c[1]?.v || 'Ad Creative',
-        date: row.c[2]?.v || '',
+        date: (() => { const d = row.c[2]; if (!d) return ''; if (d.f) return d.f; if (typeof d.v === 'string' && d.v.startsWith('Date(')) { const parts = d.v.replace('Date(','').replace(')','').split(','); const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return months[parseInt(parts[1])] + ' ' + parts[2] + ', ' + parts[0]; } return d.v || ''; })(),
         status: (row.c[3]?.v || 'pending').toLowerCase(),
         script: row.c[4]?.v || ''
       }));
